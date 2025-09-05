@@ -10,6 +10,7 @@ class LoginForm extends Component {
     password: '',
     showSubmitError: false,
     errorMsg: '',
+    isLoggedIn: false,
   }
 
   onChangeUsername = event => {
@@ -22,10 +23,8 @@ class LoginForm extends Component {
 
   onSubmitSuccess = jwtToken => {
     const {history} = this.props
-
-    Cookies.set('jwt_token', jwtToken, {
-      expires: 30,
-    })
+    Cookies.set('jwt_token', jwtToken, {expires: 30})
+    this.setState({isLoggedIn: true})
     history.replace('/')
   }
 
@@ -33,29 +32,25 @@ class LoginForm extends Component {
     this.setState({showSubmitError: true, errorMsg})
   }
 
-  submitForm = async event => {
+  submitForm = event => {
     event.preventDefault()
     const {username, password} = this.state
-    const userDetails = {username, password}
-    const url = 'https://apis.ccbp.in/login'
-    const options = {
-      method: 'POST',
-      body: JSON.stringify(userDetails),
-    }
-    const response = await fetch(url, options)
-    const data = await response.json()
-    if (response.ok === true) {
-      this.onSubmitSuccess(data.jwt_token)
+
+    const hardcodedUsername = 'kishore'
+    const hardcodedPassword = '12345678'
+
+    if (username === hardcodedUsername && password === hardcodedPassword) {
+      const fakeJwtToken = 'hardcoded-fake-jwt-token-12345'
+      this.onSubmitSuccess(fakeJwtToken)
     } else {
-      this.onSubmitFailure(data.error_msg)
+      this.onSubmitFailure('Invalid username or password')
     }
   }
 
   renderPasswordField = () => {
     const {password} = this.state
-
     return (
-      <>
+      <div className="input-container">
         <label className="input-label" htmlFor="password">
           PASSWORD
         </label>
@@ -67,15 +62,14 @@ class LoginForm extends Component {
           onChange={this.onChangePassword}
           placeholder="Password"
         />
-      </>
+      </div>
     )
   }
 
   renderUsernameField = () => {
     const {username} = this.state
-
     return (
-      <>
+      <div className="input-container">
         <label className="input-label" htmlFor="username">
           USERNAME
         </label>
@@ -87,38 +81,45 @@ class LoginForm extends Component {
           onChange={this.onChangeUsername}
           placeholder="Username"
         />
-      </>
+      </div>
     )
   }
 
   render() {
-    const {showSubmitError, errorMsg} = this.state
-    const jwtToken = Cookies.get('jwt_token')
+    const {showSubmitError, errorMsg, isLoggedIn} = this.state
 
-    if (jwtToken !== undefined) {
+    if (isLoggedIn) {
       return <Redirect to="/" />
     }
 
     return (
       <div className="login-form-container">
+        {/* Mobile logo */}
         <img
           src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-logo-img.png"
-          className="login-website-logo-mobile-img"
+          className="login-website-logo-mobile-image"
           alt="website logo"
         />
+
+        {/* Login illustration */}
         <img
           src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-login-img.png"
-          className="login-img"
+          className="login-image"
           alt="website login"
         />
+
+        {/* Form container */}
         <form className="form-container" onSubmit={this.submitForm}>
+          {/* Desktop logo */}
           <img
             src="https://assets.ccbp.in/frontend/react-js/nxt-trendz-logo-img.png"
-            className="login-website-logo-desktop-img"
+            className="login-website-logo-desktop-image"
             alt="website logo"
           />
-          <div className="input-container">{this.renderUsernameField()}</div>
-          <div className="input-container">{this.renderPasswordField()}</div>
+
+          {this.renderUsernameField()}
+          {this.renderPasswordField()}
+
           <button type="submit" className="login-button">
             Login
           </button>
